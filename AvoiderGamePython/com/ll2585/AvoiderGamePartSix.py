@@ -1,6 +1,5 @@
 import pygame, sys, random, pygbutton, math
 from pygame.locals import *
-import PixelPerfect
 
 FPS = 30 # frames per second, the general speed of the program
 WINDOWWIDTH = 400 # size of window's width in pixels
@@ -149,6 +148,8 @@ class Control:
         self.showRestartScreen(self.scoreClass, self.clock)
             
     def runGame(self):
+        self.avatarHasBeenHit = False
+        pygame.mouse.set_visible(False)
         while True:
             if self.state == "GAME":
                 self.event_loop()
@@ -175,14 +176,13 @@ class Control:
         self.avatar.moveToMouse()
         pygame.draw.rect(DISPLAYSURF, BLACK, self.avatar.rect)
     
-        self.drawStatus(self.scoreClass)
-        self.clock.addToValue(25)
+
     
         if self.hit(self.avatar):
             pygame.mouse.set_visible(True)
             
-            avatarHasBeenHit = True
-        if avatarHasBeenHit:
+            self.avatarHasBeenHit = True
+        if self.avatarHasBeenHit:
             self.state = "QUIT"
             
     def hit(self, avatar):
@@ -199,7 +199,10 @@ class Control:
         for e in self.enemies:
             Surf.blit(e._image, e.getLocation())
         Surf.blit(self.avatar._image, self.avatar.getLocation())
+        self.drawStatus(self.scoreClass)
+        self.clock.addToValue(25)
         Surf.blit(self.clock.getImage(), (WINDOWWIDTH - 80,  WINDOWHEIGHT- 50))
+        
             
     def showRestartScreen(self,scoreClass, clock):
         self.showTextScreen('Game Over')
@@ -210,6 +213,7 @@ class Control:
         while checkForButtonClick(button) == None:
             pygame.display.update()
             FPSCLOCK.tick()
+        self.newGame()
 
     def drawStatus(self,score):
         # draw the score text
@@ -270,7 +274,6 @@ def checkForButtonClick(button):
     # Go through event queue looking for a KEYUP event.
     # Grab KEYDOWN events to remove them from the event queue.
     checkForQuit()
-
     for event in pygame.event.get():
         if 'click' in button.handleEvent(event):
             return event
